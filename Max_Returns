@@ -1,6 +1,8 @@
+#This code calculates the shares with max returns of a chosen stock exchange.It doesnt calculates the optimal portfolio.
+
 import yfinance as yf
 tickers = [“ Name of the Tickers from Yahoo Finance“]  			
-#Ticker list for chosen stock exchange
+#Ticker list for chosen stock exchange or stock list
 data= yf.download(tickers, start="1998-11-30", end="1999-12-31", interval="1mo")['Adj Close']
 data_1 = data.dropna(axis=1,how='all')
 data_2 = data_1.dropna(axis=0,how='all')
