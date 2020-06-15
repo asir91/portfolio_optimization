@@ -1,0 +1,72 @@
+#This code generates the portfolioes by Monte Carlo Simulations, there fore you should pick the number of iterations you wish to analyze
+
+import yfinance as yf
+import pandas as pd
+import numpy as np
+import random
+import matplotlib.pyplot as plt
+
+tickers =[ “Name of the chosen Tickers from Yahoo Finance for 2010“]  ]
+#You should download the ticker list of companies that you wish to analyze, for instance the ticker of Apple Inc is APPL
+
+num_iter=5000 
+#Monte Carlo Simulations,you may define it
+random_port_number=16
+#The number of shares in each portolio, you may define it
+simulation_res = np.zeros((3,num_iter))
+all_weights = np.zeros((num_iter,random_port_number))
+selected_companies=np.zeros((num_iter,random_port_number),dtype = str)
+
+for i in range(num_iter):
+    sample= random.sample(tickers, random_port_number)
+    data= yf.download(sample, start="2001-11-30", end="2002-12-31", interval="1mo")['Adj Close']
+    selected_companies[i,:] = sample
+    data_percentage = data.pct_change().dropna(axis=0,thresh=7).dropna(axis=1,thresh=7)
+    mean_returns =data_percentage.mean().dropna(axis=0,how='all')
+    cov_matrix = data_percentage.cov()
+    random_weights = np.array(np.random.random(len(mean_returns)))
+    weights = random_weights / (np.sum(random_weights))
+    portfolio_return = np.sum(mean_returns * weights)
+    portfolio_StdDev = np.sqrt(np.dot(np.transpose(weights), np.dot(cov_matrix, weights)))
+    simulation_res[0,i] = portfolio_return
+    simulation_res[1,i] = portfolio_StdDev
+    simulation_res[2,i] = simulation_res[0,i] / simulation_res[1,i]
+    sim_frame = pd.DataFrame(np.transpose(simulation_res),columns=['ret','stdev','sharpe'])
+
+final_result= sim_frame.dropna(axis=0,how='any')
+
+max_sharpe = sim_frame.iloc[sim_frame['sharpe'].idxmax()]
+min_std = sim_frame.iloc[sim_frame['stdev'].idxmin()]
+sharpes =final_result['sharpe']
+Sub_optimal = sum(i <1 for i in sharpes)
+Good =sum(i >= 1 and i <2 for i in sharpes)
+Very_Good = sum(i >= 2 and i<3 for i in sharpes)
+Excellent  =sum(i >= 3 for i in sharpes)
+Sums = Sub_optimal+Good+Very_Good+Excellent
+Sharpe_Results = { '%Sub_optimal': [(int(Sub_optimal)/Sums*100)],
+                   '%Good':[(int(Good)/Sums*100)],
+                   '%Very_Good':[(int(Very_Good)/Sums*100)],
+                   '%Excellent':[(int(Excellent)/Sums*100)]}
+
+plt.figure(figsize=(8,5))
+plt.scatter(final_result.stdev,final_result.ret,final_result.sharpe, cmap='viridis')
+plt.xlim(0, 0.5)
+plt.ylim(0, 0.3)
+plt.title('2002')
+plt.colorbar(label='Sharpe Ratio')
+plt.xlabel('Variance(Risk)')
+plt.ylabel('Mean(Return)')
+plt.scatter(max_sharpe[1],max_sharpe[0],marker=('*'),color='r',s=100)
+plt.scatter(min_std[1],min_std[0],marker=('*'),color='b',s=100)
+plt.show()
+
+print(Sharpe_Results)
+print(final_result)
+print ("The portfolio for max Sharpe Ratio:\n", max_sharpe)
+print ("The portfolio for min risk:\n", min_std)
+Results
+
+
+
+
+
