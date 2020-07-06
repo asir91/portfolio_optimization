@@ -1,3 +1,5 @@
+#This code creates random portfolios for Monte Carlo Smilations
+
 import yfinance as yf
 import pandas as pd
 import numpy as np
@@ -6,8 +8,8 @@ import matplotlib.pyplot as plt
 
 tickers =[ “Name of the chosen Tickers from Yahoo Finance for 2010“]  ]
 
-num_iter=5000
-random_port_number=16
+num_iter=5000 #Needs to be identified by researcher
+random_port_number=16 #Needs to be identified by researcher
 simulation_res = np.zeros((3,num_iter))
 all_weights = np.zeros((num_iter,random_port_number))
 selected_companies=np.zeros((num_iter,random_port_number),dtype = str)
